@@ -1,0 +1,176 @@
+<style type="text/css">input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  }
+  #response {
+    float:right;
+  }
+  #next-chart {
+    float: right;
+  }
+
+  #prog {
+    color: #888888;
+  }
+  #chart-response {
+    width:20px;
+  }
+</style>
+<div id="preSam">
+
+<p id="prog">
+<i>Study progress:</i>
+<svg id="progress">
+</svg>
+</p>
+
+<p id="question">
+</p>
+
+<div>
+<svg id="canvas">
+</svg>
+</div>
+
+<div id="response">
+<input id="chart-response" name="chart-response" type="number" name="quantity" min="0" autofocus onkeydown="if (event.keyCode == 13) document.getElementById('next-chart').click()">%
+<br>
+&nbsp;
+<br>
+<button id="next-chart" type="button">Next</button>
+</div>
+
+
+</div>
+
+<script type="text/javascript">
+(function() {
+  experimentr.startTimer('trials');
+
+  var data = {};
+  var numTrials = 60;
+  var trialCounter = 0;
+  done = [false, false, false, false, false, false, false];
+  position = null;
+  var dataOptions = [82, 3, 11, 4, 67, 88, 55, 37, 89, 57, 78, 37, 25, 56, 86, 70, 16, 76, 51, 38, 80, 19, 87, 32, 14, 15, 49, 5, 16, 62, 6, 81, 41, 31, 65, 61, 52, 62, 19, 22, 69, 66, 40, 92, 36, 82, 92, 43, 13, 47, 38, 76, 41, 96, 80, 57, 73, 78, 36, 85],
+  typeOptions = ["outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie", "outerRadius", "exploded", "square", "ellipse", "pie"];
+
+  dataOptions = shuffle(dataOptions);
+  typeOptions = shuffle(typeOptions);
+
+  init();
+
+  function init() {
+    // Hiding main next button while trials are going on
+    experimentr.hideNext();
+
+    // next-chart button behavior; should load next chart and store data
+    d3.select('#next-chart').on('click', function() {
+
+      // store response
+      data['ans-trial-' + currentTrial] = d3.select('#chart-response').property('value');
+
+      // check if end of trials
+      validate();
+    });
+
+    // on input change, enable next chart
+    d3.select('#chart-response').on('keyup', function() {
+    if (event.keyCode != 13)
+      d3.select('#next-chart').attr('disabled', null);
+    });
+
+    // start first trial
+    trial();
+  }
+
+  function trial() { //trial - a single chart shown to a participant
+    experimentr.startTimer('time-trial-' + currentTrial);
+    // choose new data
+    currentData = makeData(trialCounter, dataOptions);
+    var currentType = typeOptions[trialCounter];
+    var angle = Math.random() * 360;
+
+    // update progress
+    drawProgBar("#progress", currentTrial, totalTrials);
+
+    d3.select('#question')
+      .text("What percentage of the whole is indicated in blue?")
+
+    // remove old chart
+    d3.selectAll('#chart').remove();
+    // draw new chart
+    drawChart("#canvas", currentData, angle, 1, currentType); //types: "outerRadius", "exploded", "square", "ellipse", "pie"
+    //drawChart("#canvas", "angleDonut", currentData, angle, 1);
+
+    // store chart parameters
+    data['chart-type-' + currentTrial] = currentType;
+    currentData.forEach(function(d){
+      if(d.focus)
+      {
+        data['correct-ans-' + currentTrial] = d.value;
+        data['opposite-ans-' + currentTrial] = 100-d.value;
+      }
+    });
+    data['rotation-' + currentTrial] = angle;
+
+    // clear response
+    d3.select('#chart-response').property('value', '');
+    // disable next button
+    d3.select('#next-chart').attr('disabled', 'true');
+  }
+
+  // Validate checks if all data is in for this module
+  // in this case, trialCounter should === numTrials
+  function validate() {
+
+    currentData.forEach(function(d){
+      if(d.focus)
+      {
+        data['judged-true-' + currentTrial] = Number(d3.select('#chart-response').property('value')) - d.value;
+        data['ans-percentage-diff-' + currentTrial] = (Number(d3.select('#chart-response').property('value')) - d.value) / d.value;
+        data['log-error-' + currentTrial] = Math.log2(Math.abs((Number(d3.select('#chart-response').property('value')) - d.value)) + 1 / 8)
+      }
+    });
+
+    if(trialCounter === numTrials - 1) {
+      // end module timer
+      experimentr.endTimer('trials');
+      // add data & send to server
+      experimentr.addData(data);
+      // go to next module
+      currentTrial++;
+      experimentr.next();
+    } else {
+      // enable next chart button
+      experimentr.endTimer('time-trial-'+currentTrial);
+      currentTrial++;
+      trialCounter++;
+      trial();
+    }
+  }
+
+  // from best answer: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex ;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
+}());
+</script>

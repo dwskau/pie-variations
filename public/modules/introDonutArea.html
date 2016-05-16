@@ -1,0 +1,99 @@
+<style type="text/css">input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+#next {
+    float: right;
+  }
+</style>
+<div id="preSam">
+
+<p>
+Study progress:
+<svg id="progress">
+</svg>
+</p>
+
+<p id="question">
+The number in the top right of each chart shows the correct answer to the following question:
+"What percentage of the whole is being pointed out by the red dot?"
+</p>
+
+<h2>
+Tutorial
+</h2>
+
+<div>
+<svg id="canvas1">
+</svg>
+<svg id="canvas2">
+</svg>
+<svg id="canvas3">
+</svg>
+</div>
+
+<button id="next" type="button">Next</button>
+
+</div>
+
+<script type="text/javascript">
+(function() {
+  experimentr.startTimer('trials');
+
+  var data = {};
+  var numTrials = 50;
+  done = [false, false, false, false, false, false, false];
+  position = null;
+  var dataOptions = [9, 25, 67]
+      ;
+
+  init();
+
+  function init() {
+    // Hiding main next button while trials are going on
+    experimentr.hideNext();
+
+    // next button behavior; should load next chart and store data
+    d3.select('#next').on('click', function() {
+
+      // check if end of trials
+      validate();
+    });
+
+    // start first trial
+    trial();
+  }
+
+  function trial() {
+    experimentr.startTimer('time-trial-' + currentTrial);
+    // choose new data
+    var currentType = "baselineDonut";
+    var angle = Math.random() * 360;
+
+    // update progress
+    drawProgBar("#progress", currentTrial, totalTrials);
+
+    // draw new chart
+    drawChart("#canvas1", currentType, makeData(0, dataOptions), 13, 0.5);
+    showAnswer("#canvas1", dataOptions[0], 0.5);
+    drawChart("#canvas2", currentType, makeData(1, dataOptions), 65, 0.5);
+    showAnswer("#canvas2", dataOptions[1], 0.5);
+    drawChart("#canvas3", currentType, makeData(2, dataOptions), 80, 0.5);
+    showAnswer("#canvas3", dataOptions[2], 0.5);
+
+  }
+
+  // Validate checks if all data is in for this module
+  // in this case, trialCounter should === numTrials
+  function validate() {
+      // end module timer
+      experimentr.endTimer('trials');
+      // add data & send to server
+      experimentr.addData(data);
+      // go to next module
+      experimentr.next();
+  }
+}());
+</script>

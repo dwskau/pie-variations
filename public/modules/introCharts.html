@@ -1,0 +1,152 @@
+<style type="text/css">input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+#next {
+    float: right;
+  }
+</style>
+<div id="preSam">
+
+<p>
+Study progress:
+<svg id="progress">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+
+<h2>
+Tutorial
+</h2>
+
+<p>
+In this study, you'll be shown a series of charts and asked the following question about each:
+</p>
+
+<p>
+"What percentage of the whole is indicated by the red dot?"
+</p>
+
+<p>
+The number in the top left of each row shows the correct answer for every chart in the row.
+Each column is a different type of chart.
+</p>
+
+<p>
+On the next page please enter your answer in the box above the chart.
+You may press 'Enter' (recommended) or click the 'Next' button to submit your answer and proceed to the next chart.
+If your answers are wildly inaccurate, you will not receive compensation for this HIT.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<div>
+<svg id="baselinePie1">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="baselineDonut1">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="arc1">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="anglePie1">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="angleDonut1">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+
+<p>
+&nbsp;
+</p>
+
+<div>
+<svg id="baselinePie2">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="baselineDonut2">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="arc2">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="anglePie2">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="angleDonut2">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+
+<p>
+&nbsp;
+</p>
+
+<div>
+<svg id="baselinePie3">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="baselineDonut3">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="arc3">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="anglePie3">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+<svg id="angleDonut3">
+</svg>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+
+<button id="next" type="button">Next</button>
+
+</div>
+
+<script type="text/javascript">
+(function() {
+  experimentr.startTimer('trials');
+
+  var data = {};
+  var numTrials = 50;
+  done = [false, false, false, false, false, false, false];
+  position = null;
+  var dataOptions = [9, 25, 67]
+      ;
+
+  init();
+
+  function init() {
+    // Hiding main next button while trials are going on
+    experimentr.hideNext();
+
+    // next button behavior; should load next chart and store data
+    d3.select('#next').on('click', function() {
+
+      // check if end of trials
+      validate();
+    });
+
+    // start first trial
+    trial();
+  }
+
+  function trial() {
+    experimentr.startTimer('time-trial-' + currentTrial);
+    // choose new data
+
+    // update progress
+    drawProgBar("#progress", currentTrial, totalTrials);
+
+    // draw new chart
+    drawChart("#baselinePie1", currentType, makeData(0, dataOptions), 13, 0.39);
+    showAnswer("#baselinePie1", dataOptions[0], 0.39);
+    drawChart("#baselinePie2", currentType, makeData(1, dataOptions), 65, 0.39);
+    showAnswer("#baselinePie2", dataOptions[1], 0.39);
+    drawChart("#baselinePie3", currentType, makeData(2, dataOptions), 130, 0.39);
+    showAnswer("#baselinePie3", dataOptions[2], 0.39);
+  }
+
+  // Validate checks if all data is in for this module
+  // in this case, trialCounter should === numTrials
+  function validate() {
+      // end module timer
+      experimentr.endTimer('trials');
+      // add data & send to server
+      experimentr.addData(data);
+      // go to next module
+      experimentr.next();
+  }
+}());
+</script>

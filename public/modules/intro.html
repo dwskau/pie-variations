@@ -1,0 +1,83 @@
+<style type="text/css">input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+#next {
+    float: right;
+  }
+</style>
+<div id="preSam">
+
+<p>
+Study progress:
+<svg id="progress">
+</svg>
+</p>
+
+<h2>
+Tutorial
+</h2>
+
+<p>
+In this study, you'll be shown a series of charts and asked a question about each.
+There are five types of charts.
+Three examples of each type are shown on the next page, along with correct answers.
+</p>
+
+<p>
+The progress bar at the top shows your progression through the study and will begin at the end of the tutorial.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<button id="next" type="button">Next</button>
+
+</div>
+
+<script type="text/javascript">
+(function() {
+  experimentr.startTimer('trials');
+
+  var data = {};
+//  var condition = rand //
+
+  init();
+
+  function init() {
+    // Hiding main next button while trials are going on
+    experimentr.hideNext();
+
+    // next button behavior; should load next chart and store data
+    d3.select('#next').on('click', function() {
+
+      // check if end of trials
+      validate();
+    });
+
+    // start first trial
+    trial();
+  }
+
+  function trial() {
+    experimentr.startTimer('time-trial-' + currentTrial);
+
+    // update progress
+    drawProgBar("#progress", currentTrial, totalTrials);
+  }
+
+  // Validate checks if all data is in for this module
+  // in this case, trialCounter should === numTrials
+  function validate() {
+      // end module timer
+      experimentr.endTimer('trials');
+      // add data & send to server
+      experimentr.addData(data);
+      // go to next module
+      experimentr.next();
+  }
+}());
+</script>

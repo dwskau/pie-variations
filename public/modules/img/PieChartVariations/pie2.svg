@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg id="canvas" width="358" height="358">
+<g transform="translate(179,179)" id="chart"><defs id="clip"></defs><rect width="356" height="356" fill="#ffffff" transform="translate(-179,-179)"></rect><g><g transform="rotate(1.3141921442002058)"><g class="slice" transform="translate(17.52613360087727,9.635073482034308)"><path d="M9.491012693391987e-15,-155A155,155 0 1,1 -130.87082845281236,83.05315322174441L0,0Z" fill="#1f78b4"></path></g><g class="slice" transform="translate(-17.526133600877266,-9.635073482034315)"><path d="M-130.87082845281236,83.05315322174441A155,155 0 0,1 1.0919461697334344e-13,-155L0,0Z" fill="#dddddd"></path></g></g></g></g></svg>
